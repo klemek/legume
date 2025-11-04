@@ -1,9 +1,7 @@
-# Vue-boilerplate
-*Minimal static Vue project*
+# Légume 🥦
+*🧅 VJ Table Generator 🥕*
 
-<!-- TODO: 1. rename app (and tool URL) -->
-
-### [Tool link](https://klemek.github.io/vue-boilerplate/)
+### [Tool link](https://klemek.github.io/legume/)
 
 ## Use this template
 
@@ -21,7 +19,7 @@ git merge template/master
 
 > Every task is indicated with a TODO
 
-1. [ ] Rename app in [README.md](./README.md), [index.html](./index.html) and [package.json](./package.json)
+1. [x] Rename app in [README.md](./README.md), [index.html](./index.html) and [package.json](./package.json)
 2. [ ] Change app hue and saturation in [style.css](./style.css)
 3. [ ] Remove this part and all TODO
 

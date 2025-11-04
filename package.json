@@ -1,5 +1,5 @@
 {
-  "name": "vue-boilerplate",
+  "name": "legume",
   "version": "1.0.0",
   "scripts": {
     "lint": "eslint",
@@ -7,14 +7,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/klemek/vue-boilerplate.git"
+    "url": "git+https://github.com/klemek/legume.git"
   },
   "author": "klemek",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/klemek/vue-boilerplate/issues"
+    "url": "https://github.com/klemek/legume/issues"
   },
-  "homepage": "https://klemek.github.io/vue-boilerplate",
+  "homepage": "https://klemek.github.io/legume",
   "devDependencies": {
     "@eslint/js": "^9.21.0",
     "eslint": "^9.21.0",
