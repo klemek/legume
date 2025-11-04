@@ -226,3 +226,19 @@ button.full {
 table.config td:first-child {
   text-align: right;
 }
+
+table.output,
+table.output th,
+table.output td {
+  border: 1px solid var(--text-secondary);
+}
+
+table.output td {
+  text-align: center;
+  font-size: 1.1em;
+  padding: 0.25em 0.5em;
+}
+
+table.output td:first-child {
+  text-align: right;
+}

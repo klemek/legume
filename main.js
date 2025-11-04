@@ -15,16 +15,16 @@ const utils = {
     return (Math.random() * 2 ** 32) >>> 0;
   },
   splitmix32(seed) {
-    let tmp = seed;
+    let localSeed = seed;
     // eslint-disable-next-line func-names
     return function () {
-      tmp |= 0;
-      tmp = (tmp + 0x9e3779b9) | 0;
-      tmp ^= tmp >>> 16;
+      localSeed |= 0;
+      localSeed = (localSeed + 0x9e3779b9) | 0;
+      let tmp = localSeed ^ (localSeed >>> 16);
       tmp = Math.imul(tmp, 0x21f0aaad);
       tmp ^= tmp >>> 15;
       tmp = Math.imul(tmp, 0x735a2d97);
-      return ((tmp ^= tmp >>> 15) >>> 0) / 4294967296;
+      return ((tmp ^ (tmp >>> 15)) >>> 0) / 4294967296;
     };
   },
   /* eslint-enable no-bitwise */
@@ -97,8 +97,9 @@ const app = createApp({
         candidates:
           "🥦 Broccoli\n🥕 Carrot\n🧅 Onion\n🌶️ Pepper\n🍆 Eggplant\n🥔 Potato",
         endWithAll: true,
-        back2back: true,
+        mix: 25,
       },
+      table: [],
     };
   },
   computed: {
@@ -121,6 +122,15 @@ const app = createApp({
     totalDuration() {
       return this.endTimeMinute - this.startTimeMinute;
     },
+    candidates() {
+      return this.config.candidates
+        .split("\n")
+        .map((line) => line.trim())
+        .filter(
+          (value, index, array) =>
+            value.length && array.indexOf(value) === index
+        );
+    },
   },
   watch: {
     vegetable() {
@@ -129,6 +139,7 @@ const app = createApp({
     config: {
       handler() {
         this.saveConfig();
+        this.generateData();
       },
       deep: true,
     },
@@ -146,12 +157,13 @@ const app = createApp({
       .slice(0, 6)
       .join("\n");
     this.loadConfig();
+    this.generateData();
   },
   methods: {
     getTime(minutes) {
-      return `${(minutes / 60).toFixed(0).padStart(2, "0")}:${(minutes % 60)
+      return `${Math.floor((minutes / 60) % 24)
         .toFixed(0)
-        .padStart(2, "0")}`;
+        .padStart(2, "0")}:${(minutes % 60).toFixed(0).padStart(2, "0")}`;
     },
     showApp() {
       document.getElementById("app").setAttribute("style", "");
@@ -174,6 +186,100 @@ const app = createApp({
           });
         } catch {
           /* Empty */
+        }
+      }
+    },
+    // eslint-disable-next-line max-lines-per-function
+    generateData() {
+      this.table.splice(0, this.table.length);
+      const duration = parseInt(this.config.duration, 10);
+      const prng = utils.splitmix32(this.config.seed);
+      if (this.candidates.length < 2) {
+        return;
+      }
+      const indexScores = Object.fromEntries(
+        this.candidates.map((line, index) => [index, 0])
+      );
+      const mixScores = {};
+      for (let index1 = 0; index1 < this.candidates.length - 1; index1 += 1) {
+        for (
+          let index2 = index1 + 1;
+          index2 < this.candidates.length;
+          index2 += 1
+        ) {
+          mixScores[`${index1}-${index2}`] = 0;
+        }
+      }
+      const mixThreshold = parseInt(this.config.mix, 10) / 100;
+      let lastIndexes = [];
+      const getCandidateIndex = () =>
+        Math.floor(this.candidates.length * prng());
+      for (
+        let currentTimeMinute = this.startTimeMinute;
+        currentTimeMinute < this.endTimeMinute;
+        currentTimeMinute += duration
+      ) {
+        const time = this.getTime(currentTimeMinute);
+        const minIndexScore = Math.min(...Object.values(indexScores));
+        const maxIndexScore = Math.max(...Object.values(indexScores));
+        let retries = 500;
+        if (
+          currentTimeMinute + duration >= this.endTimeMinute &&
+          this.config.endWithAll
+        ) {
+          this.table.push([time, "🥗 Salad 🥗"]);
+        } else if (prng() < mixThreshold) {
+          const minMixScore = Math.min(...Object.values(mixScores));
+          const maxMixScore = Math.max(...Object.values(mixScores));
+          const indexScoreThreshold =
+            minIndexScore + (maxIndexScore - minIndexScore) * 0.5;
+          const mixScoreThreshold =
+            minMixScore + (maxMixScore - minMixScore) * 0.25;
+          let index1 = getCandidateIndex();
+          let index2 = getCandidateIndex();
+          const key = () =>
+            `${Math.min(index1, index2)}-${Math.max(index1, index2)}`;
+          while (
+            (index1 === index2 ||
+              lastIndexes.includes(index1) ||
+              lastIndexes.includes(index2) ||
+              indexScores[index1] > indexScoreThreshold ||
+              indexScores[index2] > indexScoreThreshold ||
+              mixScores[key()] > mixScoreThreshold) &&
+            (retries -= 1) > 0
+          ) {
+            index1 = getCandidateIndex();
+            index2 = getCandidateIndex();
+          }
+          if (prng() >= 0.5) {
+            this.table.push([
+              time,
+              `${this.candidates[index1]} & ${this.candidates[index2]}`,
+            ]);
+          } else {
+            this.table.push([
+              time,
+              `${this.candidates[index2]} & ${this.candidates[index1]}`,
+            ]);
+          }
+          indexScores[index1] += 1;
+          indexScores[index2] += 1;
+          mixScores[key()] += 1;
+          lastIndexes = [index1, index2];
+        } else {
+          const indexScoreThreshold =
+            minIndexScore + (maxIndexScore - minIndexScore) * 0.25;
+          let index = getCandidateIndex();
+          while (
+            (lastIndexes.includes(index) ||
+              indexScores[index] > indexScoreThreshold) &&
+            (retries -= 1) > 0
+          ) {
+            index = getCandidateIndex();
+          }
+          this.table.push([time, this.candidates[index]]);
+          indexScores[index] += 1;
+          lastIndexes = [index];
         }
       }
     },

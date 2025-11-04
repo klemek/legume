@@ -46,7 +46,7 @@
         <td><input v-model="config.duration" id="duration" type="range" min="5" v-bind:max="totalDuration" step="5" />
         </td>
         <td>
-          <span v-if="config.duration > totalDuration * 0.25" title="slot duration might be too big">
+          <span v-if="(totalDuration / config.duration) < candidates.length" title="slot duration might be too big">
             <i icon="triangle-alert"></i> {{config.duration}} minutes
           </span>
           <span v-else>
@@ -60,16 +60,18 @@
         <td><button @click="newSeed"><i icon="dices"></i></button></td>
       </tr>
       <tr>
-        <td><label for="candidates">Candidates:</label></td>
-        <td><textarea v-model="config.candidates" id="candidates" rows="8"></textarea></td>
+        <td><label for="mix">Mix policy:</label></td>
+        <td><select id="mix" v-model="config.mix">
+            <option value="0">(0%) No mixes</option>
+            <option value="25">(~25%) Some mixes</option>
+            <option value="50">(~50%) Half mixes</option>
+            <option value="75">(~75%) A lot of mixes </option>
+            <option value="100">(100%) Only mixes</option>
+          </select></td>
       </tr>
       <tr>
-        <td></td>
-        <td>
-          <button class="full" title="Adds mixes (2 candidates) for some time slots"
-            @click="config.back2back = !config.back2back">🥣 With mixes: {{
-            config.back2back ? '✅' : '❌' }}</button>
-        </td>
+        <td><label for="candidates">Candidates:</label></td>
+        <td><textarea v-model="config.candidates" id="candidates" rows="8"></textarea></td>
       </tr>
       <tr>
         <td></td>
@@ -78,6 +80,16 @@
             @click="config.endWithAll = !config.endWithAll">🥗 With salad: {{
             config.endWithAll ? '✅' : '❌' }}</button>
         </td>
+      </tr>
+    </table>
+    <h2>Output Table</h2>
+    <table class="output">
+      <colgroup>
+        <col style="width: 25%">
+        <col>
+      </colgroup>
+      <tr v-for="row in table">
+        <td v-for="item in row">{{item}}</td>
       </tr>
     </table>
     <br />
