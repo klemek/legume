@@ -3,7 +3,7 @@
 
 ### [Tool link](https://klemek.github.io/legume/)
 
-TODO docs
+![preview.png]
 
 ## Roadmap
 
