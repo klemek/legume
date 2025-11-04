@@ -263,7 +263,7 @@ const app = createApp({
         );
     },
     slotTooBig() {
-      const slotCount = this.totalDuration / this.config.duration;
+      const slotCount = Math.ceil(this.totalDuration / this.config.duration);
 
       if (this.config.endWithAll) {
         return slotCount - 1 < this.candidates.length;
