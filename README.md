@@ -11,6 +11,6 @@ TODO docs
 - [x] Configuration
 - [ ] Generate table
 - [ ] Copy table option
-- [ ] Save last state in cookies
+- [x] Save last state in cookies
 - [ ] Other format: raw text
 - [ ] Other format: SVG

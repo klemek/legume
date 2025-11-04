@@ -44,6 +44,27 @@ const utils = {
     }
     return output;
   },
+  setCookie(cname, cvalue, exdays) {
+    const date = new Date();
+    date.setTime(date.getTime() + exdays * 24 * 60 * 60 * 1000);
+    const expires = `expires=${date.toUTCString()}`;
+    document.cookie = `${cname}=${cvalue}; path=/; ${expires}`;
+  },
+  getCookie(cname, defaultValue) {
+    const name = `${cname}=`;
+    const decodedCookie = decodeURIComponent(document.cookie);
+    const ca = decodedCookie.split(";");
+    for (let index = 0; index < ca.length; index += 1) {
+      let cookie = ca[index];
+      while (cookie.charAt(0) === " ") {
+        cookie = cookie.substring(1);
+      }
+      if (cookie.indexOf(name) === 0) {
+        return cookie.substring(name.length, cookie.length);
+      }
+    }
+    return defaultValue;
+  },
 };
 
 const VEGETABLES = {
@@ -105,6 +126,12 @@ const app = createApp({
     vegetable() {
       document.title = `${this.vegetable} Légume`;
     },
+    config: {
+      handler() {
+        this.saveConfig();
+      },
+      deep: true,
+    },
   },
   updated() {
     utils.updateIcons();
@@ -118,6 +145,7 @@ const app = createApp({
       .map((key) => `${key} ${VEGETABLES[key]}`)
       .slice(0, 6)
       .join("\n");
+    this.loadConfig();
   },
   methods: {
     getTime(minutes) {
@@ -130,6 +158,24 @@ const app = createApp({
     },
     newSeed() {
       this.config.seed = utils.randomSeed();
+    },
+    saveConfig() {
+      utils.setCookie("legume-config", JSON.stringify(this.config));
+    },
+    loadConfig() {
+      const rawCookie = utils.getCookie("legume-config", null);
+      if (rawCookie) {
+        try {
+          const parsedConfig = JSON.parse(rawCookie);
+          Object.keys(parsedConfig).forEach((key) => {
+            if (Object.hasOwn(this.config, key)) {
+              this.config[key] = parsedConfig[key];
+            }
+          });
+        } catch {
+          /* Empty */
+        }
+      }
     },
   },
 });
