@@ -72,6 +72,14 @@
       <tr>
         <td><label for="candidates">Candidates:</label></td>
         <td><textarea v-model="config.candidates" id="candidates" rows="8"></textarea></td>
+        <td>
+          <span v-if="candidates.length <= 2" title="not enough candidates">
+            <i icon="triangle-alert"></i> <i icon="users-round"></i> {{candidates.length}}
+          </span>
+          <span v-else>
+            <i icon="users-round"></i> {{candidates.length}}
+          </span>
+        </td>
       </tr>
       <tr>
         <td></td>
@@ -82,16 +90,19 @@
         </td>
       </tr>
     </table>
-    <h2>Output Table</h2>
-    <table class="output">
-      <colgroup>
-        <col style="width: 25%">
-        <col>
-      </colgroup>
-      <tr v-for="row in table">
-        <td v-for="item in row">{{item}}</td>
-      </tr>
-    </table>
+    <template v-if="table.length">
+      <h2>Output Table</h2>
+      <table class="output">
+        <colgroup>
+          <col style="width: 25%">
+          <col>
+        </colgroup>
+        <tr v-for="row in table">
+          <td v-for="item in row">{{item}}</td>
+        </tr>
+      </table>
+    </template>
+    <h2 v-else>Add more vegetables !</h2>
     <br />
     <small class="footer">
       <i icon="at-sign"></i>&nbsp;<a href="https://github.com/klemek" target="_blank">klemek</a>

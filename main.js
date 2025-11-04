@@ -194,7 +194,7 @@ const app = createApp({
       this.table.splice(0, this.table.length);
       const duration = parseInt(this.config.duration, 10);
       const prng = utils.splitmix32(this.config.seed);
-      if (this.candidates.length < 2) {
+      if (this.candidates.length <= 2) {
         return;
       }
       const indexScores = Object.fromEntries(
