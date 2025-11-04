@@ -240,6 +240,11 @@ const app = createApp({
         utils.randomInt(Object.keys(VEGETABLES).length, this.config.seed)
       ];
     },
+    vegetable2() {
+      return Object.keys(VEGETABLES)[
+        utils.randomInt(Object.keys(VEGETABLES).length, this.config.seed + 1)
+      ];
+    },
     startTimeMinute() {
       return Math.floor(
         Date.parse(`1970-01-01T${this.config.startTime}:00Z`) / 60000
