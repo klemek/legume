@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8" />
-  <title>Légume 🥦</title>
+  <title>🥦 Légume</title>
   <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="material-colors.css" />
   <script src="https://unpkg.com/lucide@0"></script>
@@ -16,7 +16,7 @@
     </script>
   <script type="module" src="main.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta property="og:title" content="Légume 🥦">
+  <meta property="og:title" content="🥦 Légume">
   <meta property="og:description" content="🧅 VJ Table Generator 🥕">
   <meta property="org:url" content="https://klemek.github.io/legume/">
 </head>
@@ -24,10 +24,62 @@
 <body>
   <main id="app" style="display: none">
     <h1>
-      Légume 🥦
+      {{vegetable}} Légume
     </h1>
-    <br />
-    <p v-html="content"></p>
+    <table class="config">
+      <colgroup>
+        <col style="width: 25%">
+        <col>
+        <col style="width: 25%">
+      </colgroup>
+      <tr>
+        <td><label for="start-time">Start time:</label></td>
+        <td><input v-model="config.startTime" id="start-time" type="time" /></td>
+      </tr>
+      <tr>
+        <td><label for="end-time">End time:</label></td>
+        <td><input v-model="config.endTime" id="end-time" type="time" /></td>
+        <td>Total: {{getTime(totalDuration)}}</td>
+      </tr>
+      <tr>
+        <td><label for="duration">Slot duration:</label></td>
+        <td><input v-model="config.duration" id="duration" type="range" min="5" v-bind:max="totalDuration" step="5" />
+        </td>
+        <td>
+          <span v-if="config.duration > totalDuration * 0.25" title="slot duration might be too big">
+            <i icon="triangle-alert"></i> {{config.duration}} minutes
+          </span>
+          <span v-else>
+            {{config.duration}} minutes
+          </span>
+        </td>
+      </tr>
+      <tr>
+        <td><label for="seed">Seed:</label></td>
+        <td><input v-model="config.seed" type="number" /></td>
+        <td><button @click="newSeed"><i icon="dices"></i></button></td>
+      </tr>
+      <tr>
+        <td><label for="candidates">Candidates:</label></td>
+        <td><textarea v-model="config.candidates" id="candidates" rows="8"></textarea></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td>
+          <button class="full" title="Adds mixes (2 candidates) for some time slots"
+            @click="config.back2back = !config.back2back">🥣 With mixes: {{
+            config.back2back ? '✅' : '❌' }}</button>
+        </td>
+      </tr>
+      <tr>
+        <td></td>
+        <td>
+          <button class="full" title="Ends event with all candidates (aka salad)"
+            @click="config.endWithAll = !config.endWithAll">🥗 With salad: {{
+            config.endWithAll ? '✅' : '❌' }}</button>
+        </td>
+      </tr>
+    </table>
     <br />
     <small class="footer">
       <i icon="at-sign"></i>&nbsp;<a href="https://github.com/klemek" target="_blank">klemek</a>

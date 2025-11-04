@@ -211,3 +211,18 @@ h6 .lucide {
 .footer {
   opacity: 50%;
 }
+
+table.config td {
+  padding: 0.25em 0.5em;
+  vertical-align: top;
+}
+
+table.config input,
+table.config select,
+button.full {
+  width: 100%;
+}
+
+table.config td:first-child {
+  text-align: right;
+}
