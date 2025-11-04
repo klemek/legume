@@ -61,13 +61,14 @@
       </tr>
       <tr>
         <td><label for="mix">Mix policy:</label></td>
-        <td><select id="mix" v-model="config.mix">
-            <option value="0">(0%) No mixes</option>
-            <option value="25">(~25%) Some mixes</option>
-            <option value="50">(~50%) Half mixes</option>
-            <option value="75">(~75%) A lot of mixes </option>
-            <option value="100">(~100%) Only mixes</option>
-          </select></td>
+        <td><input v-model="config.mix" id="mix" type="range" min="0" max="100" /></td>
+        <td>
+          <span v-if="config.mix <= 0">None</span>
+          <span v-else-if="config.mix <= 25">Maybe</span>
+          <span v-else-if="config.mix <= 50">Some</span>
+          <span v-else-if="config.mix <= 75">A lot</span>
+          <span v-else>Mostly</span>
+        </td>
       </tr>
       <tr>
         <td><label for="candidates">Candidates:</label></td>
