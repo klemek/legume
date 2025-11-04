@@ -20,7 +20,7 @@ git merge template/master
 > Every task is indicated with a TODO
 
 1. [x] Rename app in [README.md](./README.md), [index.html](./index.html) and [package.json](./package.json)
-2. [ ] Change app hue and saturation in [style.css](./style.css)
+2. [x] Change app hue and saturation in [style.css](./style.css)
 3. [ ] Remove this part and all TODO
 
 
