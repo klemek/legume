@@ -94,8 +94,7 @@ const app = createApp({
         endTime: "03:00",
         duration: 30,
         seed: utils.randomSeed(),
-        candidates:
-          "🥦 Broccoli\n🥕 Carrot\n🧅 Onion\n🌶️ Pepper\n🍆 Eggplant\n🥔 Potato",
+        candidates: "",
         endWithAll: true,
         mix: 25,
       },
@@ -151,22 +150,25 @@ const app = createApp({
     document.title = `${this.vegetable} Légume`;
     setTimeout(this.showApp);
     utils.updateIcons();
-    this.config.candidates = utils
-      .shuffleSeeded(Object.keys(VEGETABLES), this.config.seed)
-      .map((key) => `${key} ${VEGETABLES[key]}`)
-      .slice(0, 6)
-      .join("\n");
+    this.newVegetables();
     this.loadConfig();
     this.generateData();
   },
   methods: {
+    showApp() {
+      document.getElementById("app").setAttribute("style", "");
+    },
     getTime(minutes) {
       return `${Math.floor((minutes / 60) % 24)
         .toFixed(0)
         .padStart(2, "0")}:${(minutes % 60).toFixed(0).padStart(2, "0")}`;
     },
-    showApp() {
-      document.getElementById("app").setAttribute("style", "");
+    newVegetables() {
+      this.config.candidates = utils
+      .shuffleSeeded(Object.keys(VEGETABLES), this.config.seed)
+      .map((key) => `${key} ${VEGETABLES[key]}`)
+      .slice(0, 6)
+      .join("\n");
     },
     newSeed() {
       this.config.seed = utils.randomSeed();

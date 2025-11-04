@@ -73,6 +73,8 @@
         <td><label for="candidates">Candidates:</label></td>
         <td><textarea v-model="config.candidates" id="candidates" rows="8"></textarea></td>
         <td>
+          <button @click="newVegetables"><i icon="rotate-ccw"></i></button>
+          <br/>
           <span v-if="candidates.length <= 2" title="not enough candidates">
             <i icon="triangle-alert"></i> <i icon="users-round"></i> {{candidates.length}}
           </span>
