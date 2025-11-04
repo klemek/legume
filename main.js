@@ -231,6 +231,7 @@ const app = createApp({
         mix: 25,
       },
       table: [],
+      copyTableOverride: null,
     };
   },
   computed: {
@@ -333,6 +334,7 @@ const app = createApp({
       }
     },
     generateData() {
+      this.table.splice(0, this.table.length);
       if (this.candidates.length <= 2) {
         return;
       }
@@ -360,8 +362,20 @@ const app = createApp({
         table[table.length - 1][1] = "🥗 SALAD 🥗";
       }
 
-      this.table.splice(0, this.table.length);
       this.table.push(...table);
+    },
+    async copyTable() {
+      const csvTable = this.table.map((row) => row.join("\t")).join("\n");
+      try {
+        await navigator.clipboard.writeText(csvTable);
+        this.copyTableOverride = "Table Copied";
+      } catch (error) {
+        console.error(error.message);
+        this.copyTableOverride = "Error";
+      }
+      setTimeout(() => {
+        this.copyTableOverride = null;
+      }, 1000);
     },
   },
 });

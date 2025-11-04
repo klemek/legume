@@ -10,7 +10,7 @@
 - [x] Empty project from template
 - [x] Configuration
 - [x] Generate table
-- [ ] Copy table option
+- [x] Copy table option
 - [x] Save last state in cookies
 - [ ] Other format: raw text
 - [ ] Other format: SVG

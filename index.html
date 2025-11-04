@@ -95,7 +95,7 @@
     </table>
     <template v-if="table.length">
       <h2>Output Table</h2>
-      <table class="output">
+      <table id="output" class="output">
         <colgroup>
           <col style="width: 25%">
           <col>
@@ -104,9 +104,16 @@
           <td v-for="item in row">{{item}}</td>
         </tr>
       </table>
+      <br>
+      <p>
+        <button @click="copyTable">
+          <i icon="table"></i>&nbsp;
+          <span v-if="copyTableOverride">{{copyTableOverride}}</span>
+          <span v-else>Copy table</span>
+        </button>
+      </p>
     </template>
     <h2 v-else>Add more vegetables !</h2>
-    <br />
     <small class="footer">
       <i icon="at-sign"></i>&nbsp;<a href="https://github.com/klemek" target="_blank">klemek</a>
       -
