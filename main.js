@@ -67,6 +67,138 @@ const utils = {
   },
 };
 
+class TableGenerator {
+  constructor(candidates, mixThreshold, slots, seed) {
+    this.candidates = candidates;
+    this.size = this.candidates.length;
+    this.mixThreshold = mixThreshold;
+    this.slots = slots;
+    this.prng = utils.splitmix32(seed);
+    this.indexScores = this.initIndexScores();
+    this.minIndexScore = 0;
+    this.maxIndexScore = 0;
+    this.mixScores = this.initMixScores();
+    this.minMixScore = 0;
+    this.maxMixScore = 0;
+    this.lastIndexes = [];
+  }
+
+  initIndexScores() {
+    return Object.fromEntries(this.candidates.map((line, index) => [index, 0]));
+  }
+
+  initMixScores() {
+    const scores = {};
+
+    for (let index1 = 0; index1 < this.candidates.length - 1; index1 += 1) {
+      for (
+        let index2 = index1 + 1;
+        index2 < this.candidates.length;
+        index2 += 1
+      ) {
+        scores[this.mixKey(index1, index2)] = 0;
+      }
+    }
+
+    return scores;
+  }
+
+  mixKey(index1, index2) {
+    return Math.min(index1, index2) * 1000 + Math.max(index1, index2);
+  }
+
+  getRandomIndex() {
+    return Math.floor(this.prng() * this.size);
+  }
+
+  getRandomMix() {
+    const index1 = this.getRandomIndex();
+    let index2;
+    do {
+      index2 = this.getRandomIndex();
+    } while (index1 === index2);
+    return [index1, index2];
+  }
+
+  updateIndexScores() {
+    this.minIndexScore = Math.min(...Object.values(this.indexScores));
+    this.maxIndexScore = Math.max(...Object.values(this.indexScores));
+  }
+
+  updateMixScores() {
+    this.minMixScore = Math.min(...Object.values(this.mixScores));
+    this.maxMixScore = Math.max(...Object.values(this.mixScores));
+  }
+
+  indexScoreThreshold(value) {
+    return (
+      this.minIndexScore + (this.maxIndexScore - this.minIndexScore) * value
+    );
+  }
+
+  mixScoreThreshold(value) {
+    return this.minMixScore + (this.maxMixScore - this.minMixScore) * value;
+  }
+
+  getMixValue() {
+    const indexScoreThreshold = this.indexScoreThreshold(this.mixThreshold);
+    const mixScoreThreshold = this.mixScoreThreshold(0.25);
+    let retries = 500;
+    let index1, index2;
+    do {
+      [index1, index2] = this.getRandomMix();
+    } while (
+      (this.lastIndexes.includes(index1) ||
+        this.lastIndexes.includes(index2) ||
+        this.indexScores[index1] > indexScoreThreshold ||
+        this.indexScores[index2] > indexScoreThreshold ||
+        this.mixScores[this.mixKey(index1, index2)] > mixScoreThreshold) &&
+      (retries -= 1) > 0
+    );
+    if (retries === 0) {
+      return null;
+    }
+    this.indexScores[index1] += 1;
+    this.indexScores[index2] += 1;
+    this.updateIndexScores();
+    this.mixScores[this.mixKey(index1, index2)] += 1;
+    this.updateMixScores();
+    this.lastIndexes = [index1, index2];
+    return `${this.candidates[index1]} & ${this.candidates[index2]}`;
+  }
+
+  getCandidateValue() {
+    const indexScoreThreshold = this.indexScoreThreshold(0.25);
+    let retries = 500;
+    let index;
+    do {
+      index = this.getRandomIndex();
+    } while (
+      (this.lastIndexes.includes(index) ||
+        this.indexScores[index] > indexScoreThreshold) &&
+      (retries -= 1) > 0
+    );
+    this.indexScores[index] += 1;
+    this.updateIndexScores();
+    this.lastIndexes = [index];
+    return this.candidates[index];
+  }
+
+  getSlotValue() {
+    if (this.prng() < this.mixThreshold) {
+      const value = this.getMixValue();
+      if (value !== null) {
+        return value;
+      }
+    }
+    return this.getCandidateValue();
+  }
+
+  generate() {
+    return this.slots.map((slot) => [slot, this.getSlotValue()]);
+  }
+}
+
 const VEGETABLES = {
   "🥦": "Broccoli",
   "🥕": "Carrot",
@@ -165,10 +297,10 @@ const app = createApp({
     },
     newVegetables() {
       this.config.candidates = utils
-      .shuffleSeeded(Object.keys(VEGETABLES), this.config.seed)
-      .map((key) => `${key} ${VEGETABLES[key]}`)
-      .slice(0, 6)
-      .join("\n");
+        .shuffleSeeded(Object.keys(VEGETABLES), this.config.seed)
+        .map((key) => `${key} ${VEGETABLES[key]}`)
+        .slice(0, 6)
+        .join("\n");
     },
     newSeed() {
       this.config.seed = utils.randomSeed();
@@ -191,116 +323,30 @@ const app = createApp({
         }
       }
     },
-    // eslint-disable-next-line max-lines-per-function, complexity, max-statements
     generateData() {
-      this.table.splice(0, this.table.length);
-      const duration = parseInt(this.config.duration, 10);
-      const prng = utils.splitmix32(this.config.seed);
       if (this.candidates.length <= 2) {
         return;
       }
-      const indexScores = Object.fromEntries(
-        this.candidates.map((line, index) => [index, 0])
-      );
-      const mixScores = {};
-      for (let index1 = 0; index1 < this.candidates.length - 1; index1 += 1) {
-        for (
-          let index2 = index1 + 1;
-          index2 < this.candidates.length;
-          index2 += 1
-        ) {
-          mixScores[`${index1}-${index2}`] = 0;
-        }
-      }
+      const duration = parseInt(this.config.duration, 10);
       const mixThreshold = parseInt(this.config.mix, 10) / 100;
-      let lastIndexes = [];
-      const getCandidateIndex = () =>
-        Math.floor(this.candidates.length * prng());
+      const slots = [];
       for (
         let currentTimeMinute = this.startTimeMinute;
         currentTimeMinute < this.endTimeMinute;
         currentTimeMinute += duration
       ) {
-        const time = this.getTime(currentTimeMinute);
-        const minIndexScore = Math.min(...Object.values(indexScores));
-        const maxIndexScore = Math.max(...Object.values(indexScores));
-        let shouldAddMix = prng() < mixThreshold;
-        if (
-          currentTimeMinute + duration >= this.endTimeMinute &&
-          this.config.endWithAll
-        ) {
-          this.table.push([time, "🥗 Salad 🥗"]);
-        } else {
-          if (shouldAddMix) {
-            const minMixScore = Math.min(...Object.values(mixScores));
-            const maxMixScore = Math.max(...Object.values(mixScores));
-            const indexScoreThreshold =
-              minIndexScore + (maxIndexScore - minIndexScore) * mixThreshold;
-            const mixScoreThreshold =
-              minMixScore + (maxMixScore - minMixScore) * 0.25;
-            let retries = 500;
-            let index1 = getCandidateIndex();
-            let index2 = getCandidateIndex();
-            while (index2 === index1) {
-              index2 = getCandidateIndex();
-            }
-            const key = () =>
-              `${Math.min(index1, index2)}-${Math.max(index1, index2)}`;
-            while (
-              (lastIndexes.includes(index1) ||
-                lastIndexes.includes(index2) ||
-                indexScores[index1] > indexScoreThreshold ||
-                indexScores[index2] > indexScoreThreshold ||
-                mixScores[key()] > mixScoreThreshold) &&
-              (retries -= 1) > 0
-            ) {
-              index1 = getCandidateIndex();
-              index2 = getCandidateIndex();
-              // eslint-disable-next-line max-depth
-              while (index2 === index1) {
-                index2 = getCandidateIndex();
-              }
-            }
-            if (retries === 0) {
-              shouldAddMix = false;
-            } else {
-              // eslint-disable-next-line max-depth
-              if (prng() >= 0.5) {
-                this.table.push([
-                  time,
-                  `${this.candidates[index1]} & ${this.candidates[index2]}`,
-                ]);
-              } else {
-                this.table.push([
-                  time,
-                  `${this.candidates[index2]} & ${this.candidates[index1]}`,
-                ]);
-              }
-              indexScores[index1] += 1;
-              indexScores[index2] += 1;
-              mixScores[key()] += 1;
-              lastIndexes = [index1, index2];
-            }
-          }
-
-          if (!shouldAddMix) {
-            const indexScoreThreshold =
-              minIndexScore + (maxIndexScore - minIndexScore) * 0.25;
-            let retries = 500;
-            let index = getCandidateIndex();
-            while (
-              (lastIndexes.includes(index) ||
-                indexScores[index] > indexScoreThreshold) &&
-              (retries -= 1) > 0
-            ) {
-              index = getCandidateIndex();
-            }
-            this.table.push([time, this.candidates[index]]);
-            indexScores[index] += 1;
-            lastIndexes = [index];
-          }
-        }
+        slots.push(this.getTime(currentTimeMinute));
       }
+
+      const generator = new TableGenerator(
+        this.candidates,
+        mixThreshold,
+        slots,
+        this.seed
+      );
+
+      this.table.splice(0, this.table.length);
+      this.table.push(...generator.generate());
     },
   },
 });
