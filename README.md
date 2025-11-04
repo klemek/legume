@@ -4,13 +4,3 @@
 ### [Tool link](https://klemek.github.io/legume/)
 
 ![preview.png]
-
-## Roadmap
-
-- [x] Empty project from template
-- [x] Configuration
-- [x] Generate table
-- [x] Copy table option
-- [x] Save last state in cookies
-- [ ] Other format: raw text
-- [ ] Other format: SVG
