@@ -342,7 +342,7 @@ const app = createApp({
         this.candidates,
         mixThreshold,
         slots,
-        this.seed
+        this.config.seed
       );
 
       this.table.splice(0, this.table.length);
