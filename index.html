@@ -46,7 +46,7 @@
         <td><input v-model="config.duration" id="duration" type="range" min="5" v-bind:max="totalDuration" step="5" />
         </td>
         <td>
-          <span v-if="(totalDuration / config.duration) < candidates.length" title="slot duration might be too big">
+          <span v-if="slotTooBig" title="slot duration might be too big">
             <i icon="triangle-alert"></i> {{config.duration}} minutes
           </span>
           <span v-else>

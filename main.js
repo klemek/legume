@@ -262,6 +262,15 @@ const app = createApp({
             value.length && array.indexOf(value) === index
         );
     },
+    slotTooBig() {
+      const slotCount = this.totalDuration / this.config.duration;
+
+      if (this.config.endWithAll) {
+        return slotCount - 1 < this.candidates.length;
+      }
+
+      return slotCount < this.candidates.length;
+    },
   },
   watch: {
     vegetable() {
