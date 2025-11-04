@@ -345,8 +345,14 @@ const app = createApp({
         this.config.seed
       );
 
+      const table = generator.generate();
+
+      if (this.config.endWithAll) {
+        table[table.length - 1][1] = "🥗 SALAD 🥗";
+      }
+
       this.table.splice(0, this.table.length);
-      this.table.push(...generator.generate());
+      this.table.push(...table);
     },
   },
 });
