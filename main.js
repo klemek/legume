@@ -189,7 +189,7 @@ const app = createApp({
         }
       }
     },
-    // eslint-disable-next-line max-lines-per-function
+    // eslint-disable-next-line max-lines-per-function, complexity, max-statements
     generateData() {
       this.table.splice(0, this.table.length);
       const duration = parseInt(this.config.duration, 10);
@@ -222,64 +222,81 @@ const app = createApp({
         const time = this.getTime(currentTimeMinute);
         const minIndexScore = Math.min(...Object.values(indexScores));
         const maxIndexScore = Math.max(...Object.values(indexScores));
-        let retries = 500;
+        let shouldAddMix = prng() < mixThreshold;
         if (
           currentTimeMinute + duration >= this.endTimeMinute &&
           this.config.endWithAll
         ) {
           this.table.push([time, "🥗 Salad 🥗"]);
-        } else if (prng() < mixThreshold) {
-          const minMixScore = Math.min(...Object.values(mixScores));
-          const maxMixScore = Math.max(...Object.values(mixScores));
-          const indexScoreThreshold =
-            minIndexScore + (maxIndexScore - minIndexScore) * 0.5;
-          const mixScoreThreshold =
-            minMixScore + (maxMixScore - minMixScore) * 0.25;
-          let index1 = getCandidateIndex();
-          let index2 = getCandidateIndex();
-          const key = () =>
-            `${Math.min(index1, index2)}-${Math.max(index1, index2)}`;
-          while (
-            (index1 === index2 ||
-              lastIndexes.includes(index1) ||
-              lastIndexes.includes(index2) ||
-              indexScores[index1] > indexScoreThreshold ||
-              indexScores[index2] > indexScoreThreshold ||
-              mixScores[key()] > mixScoreThreshold) &&
-            (retries -= 1) > 0
-          ) {
-            index1 = getCandidateIndex();
-            index2 = getCandidateIndex();
-          }
-          if (prng() >= 0.5) {
-            this.table.push([
-              time,
-              `${this.candidates[index1]} & ${this.candidates[index2]}`,
-            ]);
-          } else {
-            this.table.push([
-              time,
-              `${this.candidates[index2]} & ${this.candidates[index1]}`,
-            ]);
-          }
-          indexScores[index1] += 1;
-          indexScores[index2] += 1;
-          mixScores[key()] += 1;
-          lastIndexes = [index1, index2];
         } else {
-          const indexScoreThreshold =
-            minIndexScore + (maxIndexScore - minIndexScore) * 0.25;
-          let index = getCandidateIndex();
-          while (
-            (lastIndexes.includes(index) ||
-              indexScores[index] > indexScoreThreshold) &&
-            (retries -= 1) > 0
-          ) {
-            index = getCandidateIndex();
+          if (shouldAddMix) {
+            const minMixScore = Math.min(...Object.values(mixScores));
+            const maxMixScore = Math.max(...Object.values(mixScores));
+            const indexScoreThreshold =
+              minIndexScore + (maxIndexScore - minIndexScore) * mixThreshold;
+            const mixScoreThreshold =
+              minMixScore + (maxMixScore - minMixScore) * 0.25;
+            let retries = 500;
+            let index1 = getCandidateIndex();
+            let index2 = getCandidateIndex();
+            while (index2 === index1) {
+              index2 = getCandidateIndex();
+            }
+            const key = () =>
+              `${Math.min(index1, index2)}-${Math.max(index1, index2)}`;
+            while (
+              (lastIndexes.includes(index1) ||
+                lastIndexes.includes(index2) ||
+                indexScores[index1] > indexScoreThreshold ||
+                indexScores[index2] > indexScoreThreshold ||
+                mixScores[key()] > mixScoreThreshold) &&
+              (retries -= 1) > 0
+            ) {
+              index1 = getCandidateIndex();
+              index2 = getCandidateIndex();
+              // eslint-disable-next-line max-depth
+              while (index2 === index1) {
+                index2 = getCandidateIndex();
+              }
+            }
+            if (retries === 0) {
+              shouldAddMix = false;
+            } else {
+              // eslint-disable-next-line max-depth
+              if (prng() >= 0.5) {
+                this.table.push([
+                  time,
+                  `${this.candidates[index1]} & ${this.candidates[index2]}`,
+                ]);
+              } else {
+                this.table.push([
+                  time,
+                  `${this.candidates[index2]} & ${this.candidates[index1]}`,
+                ]);
+              }
+              indexScores[index1] += 1;
+              indexScores[index2] += 1;
+              mixScores[key()] += 1;
+              lastIndexes = [index1, index2];
+            }
           }
-          this.table.push([time, this.candidates[index]]);
-          indexScores[index] += 1;
-          lastIndexes = [index];
+
+          if (!shouldAddMix) {
+            const indexScoreThreshold =
+              minIndexScore + (maxIndexScore - minIndexScore) * 0.25;
+            let retries = 500;
+            let index = getCandidateIndex();
+            while (
+              (lastIndexes.includes(index) ||
+                indexScores[index] > indexScoreThreshold) &&
+              (retries -= 1) > 0
+            ) {
+              index = getCandidateIndex();
+            }
+            this.table.push([time, this.candidates[index]]);
+            indexScores[index] += 1;
+            lastIndexes = [index];
+          }
         }
       }
     },
