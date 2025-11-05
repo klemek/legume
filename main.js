@@ -93,7 +93,7 @@ class TableGenerator {
     this.minMixScore = 0;
     this.maxMixScore = 0;
     this.lastIndexes = [];
-    this.mixTable = this.initMixTable();
+    this.mixTable = this.initMixTable(seed);
   }
 
   initIndexScores() {

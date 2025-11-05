@@ -65,10 +65,7 @@
         <td><input v-model="config.mix" id="mix" type="range" min="0" max="100" /></td>
         <td>
           <span v-if="config.mix <= 0">None</span>
-          <span v-else-if="config.mix <= 25">Maybe</span>
-          <span v-else-if="config.mix <= 50">Some</span>
-          <span v-else-if="config.mix <= 75">A lot</span>
-          <span v-else>Mostly</span>
+          <span v-else>~{{config.mix}}%</span>
         </td>
       </tr>
       <tr>
