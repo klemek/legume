@@ -103,6 +103,7 @@ class TableGenerator {
     return scores;
   }
 
+  // eslint-disable-next-line class-methods-use-this
   mixKey(index1, index2) {
     return Math.min(index1, index2) * 1000 + Math.max(index1, index2);
   }
@@ -312,7 +313,7 @@ const app = createApp({
     },
     newVegetables() {
       this.config.candidates = utils
-        .shuffleSeeded(Object.keys(VEGETABLES), this.config.seed)
+        .shuffleSeeded(Object.keys(VEGETABLES), utils.randomSeed())
         .map((key) => `${key} ${VEGETABLES[key]}`)
         .slice(0, 6)
         .join("\n");
@@ -374,8 +375,7 @@ const app = createApp({
       try {
         await navigator.clipboard.writeText(csvTable);
         this.copyTableOverride = "Table Copied";
-      } catch (error) {
-        console.error(error.message);
+      } catch {
         this.copyTableOverride = "Error";
       }
       setTimeout(() => {
