@@ -147,12 +147,22 @@ class TableGenerator {
     return [index1, index2];
   }
 
-  updateIndexScores() {
+  updateIndexScores(index1, index2) {
+    for (let index = 0; index < this.size; index += 1) {
+      if (index !== index1 && index !== index2) {
+        this.indexScores[index] -= 1;
+      } else {
+        this.indexScores[index] = 0;
+      }
+    }
     this.minIndexScore = Math.min(...Object.values(this.indexScores));
     this.maxIndexScore = Math.max(...Object.values(this.indexScores));
+    this.lastIndexes = [index1, index2];
   }
 
-  updateMixScores() {
+  updateMixScores(index1, index2) {
+    this.updateIndexScores(index1, index2);
+    this.mixScores[this.mixKey(index1, index2)] += 1;
     this.minMixScore = Math.min(...Object.values(this.mixScores));
     this.maxMixScore = Math.max(...Object.values(this.mixScores));
   }
@@ -169,7 +179,7 @@ class TableGenerator {
 
   getMixValue() {
     const indexScoreThreshold = this.indexScoreThreshold(this.mixThreshold);
-    const mixScoreThreshold = this.mixScoreThreshold(0.25);
+    const mixScoreThreshold = this.mixScoreThreshold(0.1);
     let retries = 500;
     let index1, index2;
     do {
@@ -185,17 +195,12 @@ class TableGenerator {
     if (retries === 0) {
       return null;
     }
-    this.indexScores[index1] += 1;
-    this.indexScores[index2] += 1;
-    this.updateIndexScores();
-    this.mixScores[this.mixKey(index1, index2)] += 1;
-    this.updateMixScores();
-    this.lastIndexes = [index1, index2];
+    this.updateMixScores(index1, index2);
     return `${this.candidates[index1]} & ${this.candidates[index2]}`;
   }
 
   getCandidateValue() {
-    const indexScoreThreshold = this.indexScoreThreshold(0.25);
+    const indexScoreThreshold = this.indexScoreThreshold(0.1);
     let retries = 500;
     let index;
     do {
@@ -205,9 +210,7 @@ class TableGenerator {
         this.indexScores[index] > indexScoreThreshold) &&
       (retries -= 1) > 0
     );
-    this.indexScores[index] += 1;
-    this.updateIndexScores();
-    this.lastIndexes = [index];
+    this.updateIndexScores(index);
     return this.candidates[index];
   }
 
