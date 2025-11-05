@@ -65,6 +65,18 @@ const utils = {
     }
     return defaultValue;
   },
+  gcd(numA, numB) {
+    let tmpA = numA;
+    let tmpB = numB;
+    while (tmpA !== tmpB) {
+      if (tmpA > tmpB) {
+        tmpA -= tmpB;
+      } else {
+        tmpB -= tmpA;
+      }
+    }
+    return tmpA;
+  },
 };
 
 class TableGenerator {
@@ -81,6 +93,7 @@ class TableGenerator {
     this.minMixScore = 0;
     this.maxMixScore = 0;
     this.lastIndexes = [];
+    this.mixTable = this.initMixTable();
   }
 
   initIndexScores() {
@@ -101,6 +114,19 @@ class TableGenerator {
     }
 
     return scores;
+  }
+
+  initMixTable(seed) {
+    const mixSlots = Math.round(this.mixThreshold * this.slots.length);
+    if (mixSlots <= 0) {
+      return [false];
+    }
+    const gcd = utils.gcd(mixSlots, this.slots.length);
+    const mixTableLength = this.slots.length / gcd;
+    const tmpMixTable = new Array(mixTableLength)
+      .fill(0)
+      .map((unused, index) => index < mixSlots / gcd);
+    return utils.shuffleSeeded(tmpMixTable, seed + 1);
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -185,8 +211,8 @@ class TableGenerator {
     return this.candidates[index];
   }
 
-  getSlotValue() {
-    if (this.prng() < this.mixThreshold) {
+  getSlotValue(index) {
+    if (this.mixTable[index % this.mixTable.length]) {
       const value = this.getMixValue();
       if (value !== null) {
         return value;
@@ -196,7 +222,7 @@ class TableGenerator {
   }
 
   generate() {
-    return this.slots.map((slot) => [slot, this.getSlotValue()]);
+    return this.slots.map((slot, index) => [slot, this.getSlotValue(index)]);
   }
 }
 
