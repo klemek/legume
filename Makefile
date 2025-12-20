@@ -32,9 +32,9 @@ fix: ## fix and reformat code
 	@$(NPM) run format
 	@$(NPM) run lint-fix
 
-rebase-template: ## update code from template
+update-template: ## update code from template
 	@(git remote | grep template &>/dev/null) || git remote add template https://github.com/klemek/vue-boilerplate.git
 	git fetch template
-	git rebase template/master
+	git merge template/master --allow-unrelated-histories
 
 
