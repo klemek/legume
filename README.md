@@ -9,15 +9,22 @@
 
 <!-- TODO: 3. remove this part -->
 
+### Creating project
+
+#### Method 1: Using GitHub repository template
+
+[Use this template](https://github.com/new?template_name=vue-boilerplate&template_owner=klemek)
+
+#### Method 2: CLI forking
+
 ```bash
 git clone git@github.com/klemek/vue-boilerplate.git {PROJECT}
 cd {PROJECT}
 git remote rename origin template
 git remote add origin {PROJECT REMOTE}
-# everytime you want to update your fork
-git fetch --all
-git merge template/master
 ```
+
+### Tasks
 
 > Every task is indicated with a TODO
 
@@ -25,8 +32,32 @@ git merge template/master
 2. [ ] Change app hue and saturation in [style.css](./style.css)
 3. [ ] Remove this part and all TODO
 
+### Updating from template
 
-## Tips
+To update from templates latest changes:
+
+```shell
+make update-template
+```
+
+### Makefile targets
+
+```txt
+Usage: make [target1] (target2) ...
+
+Commands/Targets:
+help                 show this message
+build                build static site in "dist"
+dev                  run dev version of static site
+lint                 lint code
+fix                  fix and reformat code
+update-template      fetch and merge core changes from template
+
+Environment:
+BUN = bun
+```
+
+### Tips
 
 * [Material design colors](https://materialui.co/colors/) are available, you can use `class="red-500"` on your HTML
 * [Lucide icons](https://lucide.dev/icons) are available, you can use `<LucideIcon name=house/>` on your Vue template

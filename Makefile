@@ -1,8 +1,4 @@
-ifeq ($(shell which bun &>/dev/null && echo 1 || echo 0), 1)
-	NPM ?= bun
-endif
-
-NPM ?= npm
+BUN ?= bun
 
 .PHONY: help
 help: ## show this message
@@ -18,21 +14,24 @@ help: ## show this message
 print-%:
 	@echo -e '\033[32m$*\033[0m = $($*)'
 
-build: ## build static site in "dist"
-	@$(NPM) run build
+node_modules: package-lock.json
+	@$(BUN) install
 
-.PHONY: run
-def: ## run dev version of static site
-	@$(NPM) run dev
+build: node_modules ## build static site in "dist"
+	@$(BUN) run build
 
-lint: ## lint code
-	@$(NPM) run lint
+.PHONY: dev
+dev: node_modules ## run dev version of static site
+	@$(BUN) run dev
 
-fix: ## fix and reformat code
-	@$(NPM) run format
-	@$(NPM) run lint-fix
+lint: node_modules ## lint code
+	@$(BUN) run lint
 
-update-template: ## update code from template
+fix: node_modules ## fix and reformat code
+	@$(BUN) run format
+	@$(BUN) run lint-fix
+
+update-template: ## fetch and merge core changes from template
 	@(git remote | grep template &>/dev/null) || git remote add template https://github.com/klemek/vue-boilerplate.git
 	git fetch template
 	git merge template/master --allow-unrelated-histories
