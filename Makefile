@@ -26,6 +26,7 @@ dev: node_modules ## run dev version of static site
 
 lint: node_modules ## lint code
 	@$(BUN) run lint
+	@$(BUN) run type-check
 
 fix: node_modules ## fix and reformat code
 	@$(BUN) run format
