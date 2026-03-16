@@ -28,7 +28,7 @@ lint: node_modules ## lint code
 	@$(BUN) run lint
 	@$(BUN) run type-check
 
-fix: node_modules ## fix and reformat code
+format: node_modules ## fix and reformat code
 	@$(BUN) run format
 	@$(BUN) run lint-fix
 

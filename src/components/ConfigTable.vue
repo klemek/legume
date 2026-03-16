@@ -106,7 +106,8 @@ watch(config, saveConfig, { deep: true });
             </td>
             <td>
                 <span v-if="slotTooBig" title="slot duration might be too big">
-                    <LucideIcon name="triangle-alert" /> {{ config.duration }} minutes
+                    <LucideIcon name="triangle-alert" />
+                    {{ config.duration }} minutes
                 </span>
                 <span v-else> {{ config.duration }} minutes </span>
             </td>
@@ -144,13 +145,16 @@ watch(config, saveConfig, { deep: true });
                 ></textarea>
             </td>
             <td>
-                <button @click="newVegetables"><LucideIcon name="dices" /></button>
+                <button @click="newVegetables">
+                    <LucideIcon name="dices" />
+                </button>
                 <br />
                 <span
                     v-if="candidates.length <= 2"
                     title="not enough candidates"
                 >
-                    <LucideIcon name="triangle-alert" /> <LucideIcon name="users-round" />
+                    <LucideIcon name="triangle-alert" />
+                    <LucideIcon name="users-round" />
                     {{ candidates.length }}
                 </span>
                 <span v-else>

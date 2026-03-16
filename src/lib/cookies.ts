@@ -25,7 +25,7 @@ export function getDataCookie<T extends object>(
     if (rawCookie.length) {
         try {
             const parsedConfig = JSON.parse(rawCookie) as T;
-            return { ...parsedConfig, ...defaultValue };
+            return { ...defaultValue, ...parsedConfig };
         } catch {
             /* Empty */
         }

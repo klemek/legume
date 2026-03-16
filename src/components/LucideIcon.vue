@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted } from "vue";
+import { computed } from "vue";
 import * as icons from "lucide-vue-next";
 
 interface Props {
@@ -24,10 +24,6 @@ function kebab2camel(kebab: string): string {
         )
         .join("");
 }
-
-onMounted(() => {
-    console.log(kebab2camel(props.name));
-});
 
 // @ts-expect-error: cannot infer type of all exported data
 const icon = computed(() => icons[kebab2camel(props.name)]);
